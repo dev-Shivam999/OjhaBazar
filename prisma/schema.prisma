@@ -136,6 +136,7 @@ model Address {
   orders    Order[] 
 }
 
+
 model Coupon {
   id        String  @id @default(uuid())
   code      String  @unique
