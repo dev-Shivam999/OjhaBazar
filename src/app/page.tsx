@@ -1,30 +1,12 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import client from '@/db/DB'
-import { Product } from './lib/action/Product';
+import Items from "./../components/Items";
 
-const page = () => {
-  const [ProductItem, SetProduct] = useState<Product[]>([])
-  const Api = async () => {
-    const data =await Product()
-    SetProduct(data)
-  }
-  console.log(ProductItem);
-  
-  useEffect(() => {
-    Api()
-  }, [])
+const Page = async () => {
   return (
-    <div>
-      Shop
-{
-  ProductItem.length>0&&<div>
-    
-  </div>
-}
-
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold text-center mb-6">Shop</h1>
+      <Items />
     </div>
   );
 };
 
-export default page;
+export default Page;
