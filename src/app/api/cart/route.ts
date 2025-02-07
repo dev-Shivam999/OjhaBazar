@@ -1,31 +1,19 @@
+import { addToCart } from "@/app/lib/actions/AddCart";
+import { NextResponse } from "next/server";
 
-import prisma from "@/db/DB";
-import { NextRequest, NextResponse } from "next/server";
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     try {
-        
-        const { productId, userID } = await req.json();
+        const { productId, userId } = await req.json();
+        console.log("Received request:", { productId, userId });
 
-        if (!productId || !userID) {
-            return NextResponse.json({ message: "Invalid request" }, { status: 400 });
+        if (!productId || !userId) {
+            return NextResponse.json({ error: "Missing productId or userId" }, { status: 400 });
         }
-        const cartItem = await prisma.cart.create({
-            data: {
-                userId: userID,
-                items: {
-                    create: {
-                        productId,
-                    },
-                },
-            
-                
-            },
-        });
 
-        return NextResponse.json({ message: "Added to cart", cartItem }, { status: 201 });
+        const result = await addToCart(productId, userId);
+        return NextResponse.json(result);
     } catch (error) {
-        console.error("Error adding to cart:", error);
-        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+        console.error("API Error:", error);
+        return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
     }
 }

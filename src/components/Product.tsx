@@ -19,7 +19,7 @@ export const Products = ({ products }: { products: any }) => {
                 body: JSON.stringify({
                     productId: id,
                     //@ts-ignore
-                    userID: session.user?.id, 
+                    userId: session.user?.id, 
                 }),
             });
 
