@@ -10,7 +10,9 @@ interface Product {
     price: number;
     stock: number;
     imageUrl: string;
-    category: string;
+    category: {
+        name:string
+    };
 }
 
 const ProductPage = () => {
@@ -25,6 +27,8 @@ const ProductPage = () => {
                 if (!res.ok) throw new Error("Product not found");
                 const data = await res.json();
                 setProduct(data);
+                console.log(data);
+                
             } catch (error) {
                 console.error(error);
             } finally {
@@ -55,7 +59,7 @@ const ProductPage = () => {
                 <div className="w-full md:w-1/2 flex flex-col justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">{product.title}</h1>
-                        <p className="text-gray-600 text-sm mt-2">Category: <span className="font-semibold">{product.category}</span></p>
+                        <p className="text-gray-600 text-sm mt-2">Category: <span className="font-semibold">{product.category.name}</span></p>
                         <p className="mt-4 text-lg text-gray-700">{product.description}</p>
                         <p className="mt-4 text-xl font-semibold text-blue-600">₹{product.price}</p>
                         <p className={`mt-2 ${product.stock > 0 ? "text-green-600" : "text-red-500"} font-semibold`}>

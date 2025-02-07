@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export const Products = ({ products }: { products: any }) => {
                 body: JSON.stringify({
                     productId: id,
                     //@ts-ignore
-                    userId: session.user?.id, 
+                    userId: session.user?.id,
                 }),
             });
 
@@ -29,7 +29,7 @@ export const Products = ({ products }: { products: any }) => {
             } else {
                 alert(`Error: ${data.message}`);
             }
-            
+
         } catch (error) {
             console.error("AddToCart Error:", error);
             alert("Something went wrong!");
@@ -46,8 +46,10 @@ export const Products = ({ products }: { products: any }) => {
                         <Link href={`/product/${product.id}`}>
                             <div>
                                 <h2>{product.title}</h2>
-                                <img src={product.imageUrl} alt="product image" className="w-full h-auto" />
-                                <p>{product.description}</p>
+                             
+
+                                <img src={product.imageUrl} alt="product image" className="w-[300px] h-[300px] rounded-xl object-cover object-center " />
+                                <p>{product.description.toString().slice(0,30)}</p>
                                 <div>Stock: {product.stock}</div>
                                 <p>Price: ${Number(product.price)}</p>
                             </div>
