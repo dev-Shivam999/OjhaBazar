@@ -30,7 +30,7 @@ model Product {
   id          String   @id @default(uuid())
   title       String  
   description String  
-  price       Decimal 
+  price       Int 
   stock       Int      @default(0)
   imageUrl    String  
   category    Category @relation(fields: [categoryId], references: [id])
@@ -78,7 +78,7 @@ model Order {
   user        User         @relation(fields: [userId], references: [id])
   addressId   String
   address     Address      @relation(fields: [addressId], references: [id])
-  totalAmount Decimal  
+  totalAmount Int  
   status      OrderStatus  @default(PENDING)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -102,14 +102,14 @@ model OrderItem {
   productId  String
   product    Product @relation(fields: [productId], references: [id])
   quantity   Int     @default(1)
-  price      Decimal
+  price      Int
 }
 
 model Payment {
   id        String  @id @default(uuid())
   orderId   String  @unique
   order     Order   @relation(fields: [orderId], references: [id])
-  amount    Decimal
+  amount    Int
   status    PaymentStatus @default(PENDING)
   provider  String
   createdAt DateTime @default(now())
@@ -140,7 +140,7 @@ model Address {
 model Coupon {
   id        String  @id @default(uuid())
   code      String  @unique
-  discount  Decimal
+  discount  Int
   validTill DateTime
   isActive  Boolean @default(true)
 }
