@@ -18,18 +18,16 @@ export default function CartPage() {
     }, [])
 
 
-    const price = useMemo(() => cart?.reduce((acc, num) => acc + num.product.price, 0), [])
+    const price = useMemo(() => cart?.reduce((acc, num) => acc + num.product.price, 0), [cart])
 
     const Remove = async (id: string) => {
        try {
-           const data = await fetch(`/api/cartDelete/${id}`, { method: "DELETE" })
+             fetch(`/api/cartDelete/${id}`, { method: "DELETE" })
 
-           const result = await data.json()
            
-           setCart((prevCart: any) => ({
-               ...prevCart,
-               items: prevCart.items.filter((item: any) => item.id !== id),
-           }));
+           setCart((prevCart: any) => 
+               prevCart.filter((item: any) => item.id !== id),
+        );
        } catch (error) {
         console.log(error);
         
@@ -39,6 +37,8 @@ export default function CartPage() {
 
     }
 
+    
+    
     return (
         <div>
             <h1>Cart</h1>
@@ -80,14 +80,14 @@ export default function CartPage() {
                             </div>
                         </li>
                     ))}
+
+                    total Price:${price}
                 </ul>
             ) : (
                 <p>Your cart is empty or you are not logged in.</p>
             )}
 
 
-            total Price:{price
-            }
         </div>
     );
 }

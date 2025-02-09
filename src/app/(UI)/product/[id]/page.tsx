@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import CartBtn from "@/components/CartBtn";
 
 interface Product {
     id: string;
@@ -68,13 +69,14 @@ const ProductPage = () => {
                     </div>
 
                     <div className="mt-6">
-                        <button
+                        {/* <button onClick={()=>}
                             className={`w-full py-3 rounded-lg text-white font-semibold shadow-md transition ${product.stock > 0 ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
                                 }`}
                             disabled={product.stock === 0}
                         >
                             {product.stock > 0 ? "Add to Cart" : "Sold Out"}
-                        </button>
+                        </button> */}
+                        <CartBtn ProductId={product.id} ProductSock={product.stock}/>
                     </div>
                 </div>
             </div>

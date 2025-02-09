@@ -56,16 +56,20 @@ const Nav = () => {
                 <button>🔍</button>
             </div>
 
-           {
+            {
                 result.length > 0 && search.length > 0 &&
                 <ul className="absolute top-[90%] bg-white text-black p-4 rounded-md  left-1/2 -translate-x-1/2">
                     {
-                            result.map((data: any) => <li className=""><Link href={`/product/${data.id}`}>{data.title}</Link></li>)
+                        result.map((data: any) => <li key={data.id} className=""><Link href={`/product/${data.id}`}>{data.title}</Link></li>)
                     }
                 </ul>
-           }
+            }
 
             <div className="flex gap-4">
+                {session?.user && <button onClick={() =>router.push('/order') }className="bg-yellow-300 text-white px-4 py-2 rounded" >
+                    Orders
+                </button>}
+
                 <button
                     className="bg-blue-500 text-white px-4 py-2 rounded"
                     onClick={() => (session?.user ? router.push("/cart") : signIn())}

@@ -5,11 +5,11 @@ import db from "@/db/DB";
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
-            name: "Credentials",
+            name: "email",
             credentials: {
-                password: { label: "Password", type: "password", required: true },
                 name: { label: "email", type: "email", required: true },
                 email: { label: "name", type: "name", required: true },
+                password: { label: "Password", type: "password", required: true },
             },
             async authorize(credentials: any) {
                 const existingUser = await db.user.findFirst({
