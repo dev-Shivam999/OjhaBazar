@@ -15,12 +15,23 @@ export async function GET() {
         where: {
             //@ts-ignore
             userId: session.user.id,
+            
         },
-        include: {
-            orderItems: true,
-        },
+     
+        select:{
+            address:true,
+            orderItems:{
+                include:{
+                    product:true
+                }
+            }
+            ,status:true
+
+        }
+      
+       
     });
-    console.log(orders);
+    
     
 
     return NextResponse.json(orders);
