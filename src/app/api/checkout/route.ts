@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db/DB";
 import Razorpay from "razorpay";
-import crypto from "crypto";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth/auth";
 
@@ -44,9 +43,9 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // Create Razorpay order
+        
         const razorpayOrder = await razorpay.orders.create({
-            amount: product.price * 100, // Razorpay accepts amount in paise
+            amount: product.price * 100, 
             currency: "INR",
             receipt: order.id,
         });
