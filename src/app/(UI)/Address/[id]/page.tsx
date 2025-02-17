@@ -50,7 +50,7 @@ const AddressList: React.FC<AddressListProps> = ({ addresses, productId }) => {
                                 orderId: data.orderId,
                                 razorpayPaymentId: response.razorpay_payment_id,
                                 razorpayOrderId: response.razorpay_order_id,
-                                razorpaySignature: response.razorpay_signature,
+                               
                             }),
                         });
 
