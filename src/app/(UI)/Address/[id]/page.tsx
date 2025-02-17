@@ -1,45 +1,73 @@
-"use client"; // Ensures this runs only on the client
-
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Address = {
     id: string;
-    fullName: string;
-    phone: string;
     street: string;
     city: string;
     state: string;
-    country: string;
-    zipCode: string;
+    zip: string;
 };
 
-export default function AddressList() {
-    const router=useRouter()
-    const {id}=useParams()
-    const [addresses, setAddresses] = useState<Address[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [newAddress, setNewAddress] = useState<Address>({
-        id: "",
-        fullName: "",
-        phone: "",
+type AddressListProps = {
+    addresses: Address[];
+    productId: string;
+};
+
+const AddressList: React.FC<AddressListProps> = ({ addresses, productId }) => {
+    const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+    const [newAddress, setNewAddress] = useState({
         street: "",
         city: "",
         state: "",
-        country: "",
-        zipCode: "",
+        zip: "",
     });
-    const onSelect=async(adr:string)=>{
+    const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+    const router = useRouter();
+
+    const onSelect = async (addressId: string) => {
         try {
             const res = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ productId: id, address: adr }),
+                body: JSON.stringify({ productId, address: addressId }),
             });
 
             const data = await res.json();
             if (res.ok) {
-                router.push(`/pay/${data.orderId}`)    
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: data.currency,
+                    order_id: data.razorpayOrderId,
+                    name: "Your Store",
+                    description: "Order Payment",
+                    handler: async function (response: any) {
+                        const verifyRes = await fetch("/api/verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                orderId: data.orderId,
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpayOrderId: response.razorpay_order_id,
+                                razorpaySignature: response.razorpay_signature,
+                            }),
+                        });
+
+                        const verifyData = await verifyRes.json();
+                        if (verifyData.success) {
+                            alert("Payment successful!");
+                            router.push(`/order/${data.orderId}`);
+                        } else {
+                            alert("Payment verification failed!");
+                        }
+                    },
+                    prefill: { name: "Customer", email: "customer@example.com", contact: "9999999999" },
+                    theme: { color: "#F37254" },
+                };
+
+                const razor = new (window as any).Razorpay(options);
+                razor.open();
             } else {
                 alert(`Error: ${data.error}`);
             }
@@ -47,121 +75,63 @@ export default function AddressList() {
             console.error("Buy Now Error:", error);
             alert("Something went wrong!");
         }
-    }
+    };
 
-    useEffect(() => {
-        const fetchAddresses = async () => {
-            try {
-                const res = await fetch("/api/address");
-                const data = await res.json();
-                setAddresses(data);
-                
-            } catch (error) {
-                console.error("Error fetching addresses:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchAddresses();
-    }, []);
-
-    const handleAddAddress = async () => {
-        if (!newAddress.fullName) return alert("Please enter all details!");
-        setLoading(true);
-
-        try {
-            const res = await fetch("/api/address", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newAddress),
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                setAddresses([...addresses,data]);
-                setNewAddress({
-                    id: "",
-                    fullName: "",
-                    phone: "",
-                    street: "",
-                    city: "",
-                    state: "",
-                    country: "",
-                    zipCode: "",
-                });
-            }
-        } catch (error) {
-            console.error("Error adding address:", error);
-        } finally {
-            setLoading(false);
-        }
+    const handleAddAddress = () => {
+        setShowNewAddressForm(true);
     };
 
     return (
-        <div className="p-4">
-            <h2 className="text-xl font-bold">Select Address</h2>
+        <div>
+            <h2>Select an Address</h2>
+            <ul>
+                {addresses.map((adr) => (
+                    <li key={adr.id}>
+                        <input
+                            type="radio"
+                            name="address"
+                            value={adr.id}
+                            checked={selectedAddress === adr.id}
+                            onChange={() => setSelectedAddress(adr.id)}
+                        />
+                        {adr.street}, {adr.city}, {adr.state}, {adr.zip}
+                    </li>
+                ))}
+            </ul>
+            <button onClick={() => selectedAddress && onSelect(selectedAddress)}>Buy Now</button>
 
-            {loading ? (
-                <p>Loading addresses...</p>
-            ) : (
-                <ul>
-                    {addresses.length>0&&addresses.map((addr) => (
-                        <li key={addr.id} className="border p-3 my-2 rounded-md">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p><strong>{addr.fullName}</strong></p>
-                                    <p>{addr.street}, {addr.city}, {addr.state}, {addr.zipCode}</p>
-                                    <p>{addr.country} | {addr.phone}</p>
-                                </div>
-                                <button
-                                    className="bg-blue-500 text-white p-2 rounded"
-                                    onClick={() => onSelect(addr.id)}
-                                >
-                                    Select
-                                </button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+            <button onClick={handleAddAddress}>Add New Address</button>
+            {showNewAddressForm && (
+                <form>
+                    <input
+                        type="text"
+                        placeholder="Street"
+                        value={newAddress.street}
+                        onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="City"
+                        value={newAddress.city}
+                        onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="State"
+                        value={newAddress.state}
+                        onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Zip Code"
+                        value={newAddress.zip}
+                        onChange={(e) => setNewAddress({ ...newAddress, zip: e.target.value })}
+                    />
+                    <button type="submit">Save Address</button>
+                </form>
             )}
-
-            <h2 className="text-lg font-semibold mt-4">Add New Address</h2>
-            <input type="text" placeholder="Full Name" className="border text-black p-2 w-full"
-                value={newAddress.fullName}
-                onChange={(e) => setNewAddress({ ...newAddress, fullName: e.target.value })}
-            />
-            <input type="text" placeholder="Street" className="border text-black p-2 w-full"
-                value={newAddress.street}
-                onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-            />
-            <input type="text" placeholder="City" className="border text-black p-2 w-full"
-                value={newAddress.city}
-                onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-            />
-            <input type="text" placeholder="State" className="border text-black p-2 w-full"
-                value={newAddress.state}
-                onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
-            />
-            <input type="text" placeholder="Country" className="border text-black p-2 w-full"
-                value={newAddress.country}
-                onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
-            />
-            <input type="text" placeholder="Zip Code" className="border text-black p-2 w-full"
-                value={newAddress.zipCode}
-                onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
-            />
-            <input type="text" placeholder="Phone Number" className="border text-black p-2 w-full"
-                value={newAddress.phone}
-                onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-            />
-
-            <button
-                className="bg-green-500 text-white p-2 mt-2 w-full"
-                disabled={loading}
-                onClick={handleAddAddress}
-            >
-                {loading ? "Saving..." : "Add Address"}
-            </button>
         </div>
     );
-}
+};
+
+export default AddressList;
